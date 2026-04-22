@@ -8,7 +8,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface WorkloadDataRepository extends JpaRepository<WorkloadData, Long> {
 
-    @Query(value = "SELECT pg_sleep(0.05), id, data, created_at FROM workload_data WHERE id = 1", 
-           nativeQuery = true)
+    @Query(value = """
+    SELECT id, data, created_at
+    FROM workload_data
+    WHERE id = 1
+      AND pg_sleep(0.05) IS NOT NULL
+    """, nativeQuery = true)
     WorkloadData executeIoBoundQuery();
 }

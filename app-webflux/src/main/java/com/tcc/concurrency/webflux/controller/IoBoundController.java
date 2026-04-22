@@ -27,12 +27,10 @@ public class IoBoundController {
     @GetMapping
     public Mono<ResponseEntity<WorkloadResult>> executeIoWorkload() {
         final long startTime = System.currentTimeMillis();
-        final String threadName = Thread.currentThread().getName();
-
-        logger.debug("Executing I/O-bound workload on thread: {}", threadName);
 
         return ioBoundService.executeIoBoundWorkload()
                 .map(data -> {
+                    final String threadName = Thread.currentThread().getName();
                     final long executionTime = System.currentTimeMillis() - startTime;
 
                     final WorkloadResult result = new WorkloadResult(
