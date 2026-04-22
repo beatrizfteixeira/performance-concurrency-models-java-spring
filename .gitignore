@@ -13,8 +13,7 @@ build/
 .vscode/
 
 # Resultados gerados (opcional - remova se quiser versionar)
-*.png
-*.csv
+*.iml
 
 # Arquivos extraídos do tar.gz
 20260422_051015/
