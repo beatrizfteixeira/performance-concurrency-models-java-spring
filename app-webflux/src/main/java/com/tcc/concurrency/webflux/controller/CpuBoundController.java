@@ -27,23 +27,23 @@ public class CpuBoundController {
     @GetMapping
     public Mono<ResponseEntity<WorkloadResult>> executeCpuWorkload() {
         final long startTime = System.currentTimeMillis();
-        final String threadName = Thread.currentThread().getName();
-        
-        logger.debug("Executing CPU-bound workload on thread: {}", threadName);
-        
+
         return Mono.fromSupplier(() -> {
+            final String threadName = Thread.currentThread().getName();
+
+            logger.debug("Executing CPU-bound workload on thread: {}", threadName);
+
             final String hash = cpuBoundService.executeCpuBoundWorkload();
-            
             final long executionTime = System.currentTimeMillis() - startTime;
-            
+
             final WorkloadResult result = new WorkloadResult(
-                "CPU-BOUND",
-                executionTime,
-                LocalDateTime.now(),
-                threadName,
-                hash.substring(0, 16)
+                    "CPU-BOUND",
+                    executionTime,
+                    LocalDateTime.now(),
+                    threadName,
+                    hash.substring(0, 16)
             );
-            
+
             return ResponseEntity.ok(result);
         });
     }

@@ -28,22 +28,22 @@ public class IoBoundController {
     public Mono<ResponseEntity<WorkloadResult>> executeIoWorkload() {
         final long startTime = System.currentTimeMillis();
         final String threadName = Thread.currentThread().getName();
-        
+
         logger.debug("Executing I/O-bound workload on thread: {}", threadName);
-        
+
         return ioBoundService.executeIoBoundWorkload()
-            .map(data -> {
-                final long executionTime = System.currentTimeMillis() - startTime;
-                
-                final WorkloadResult result = new WorkloadResult(
-                    "IO-BOUND",
-                    executionTime,
-                    LocalDateTime.now(),
-                    threadName,
-                    data != null ? data.getData() : "null"
-                );
-                
-                return ResponseEntity.ok(result);
-            });
+                .map(data -> {
+                    final long executionTime = System.currentTimeMillis() - startTime;
+
+                    final WorkloadResult result = new WorkloadResult(
+                            "IO-BOUND",
+                            executionTime,
+                            LocalDateTime.now(),
+                            threadName,
+                            data != null ? data.getData() : "null"
+                    );
+
+                    return ResponseEntity.ok(result);
+                });
     }
 }
