@@ -1,0 +1,20 @@
+# Python
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Resultados gerados (opcional - remova se quiser versionar)
+*.png
+*.csv
+
+# Arquivos extraídos do tar.gz
+20260422_051015/
