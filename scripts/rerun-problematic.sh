@@ -11,8 +11,8 @@ WEBFLUX_URL="http://18.236.90.11:8081"
 
 # Configurações com CV > 20% identificadas pela análise estatística (mvc-io-250 e mvc-io-400 nas métricas p99)
 PROBLEMATIC_CONFIGS=(
-  "mvc:${MVC_URL}:io:250"
-  "mvc:${MVC_URL}:io:400"
+  "mvc|${MVC_URL}|io|250"
+  "mvc|${MVC_URL}|io|400"
 )
 
 REPEATS=3
@@ -76,7 +76,7 @@ main() {
 
   for repeat in $(seq 1 ${REPEATS}); do
     for config in "${PROBLEMATIC_CONFIGS[@]}"; do
-      IFS=':' read -r app_name app_url workload vus <<< "${config}"
+      IFS='|' read -r app_name app_url workload vus <<< "${config}"
       run_test_with_raw "${app_name}" "${app_url}" "${workload}" "${vus}" "${repeat}"
       sleep 60
     done
