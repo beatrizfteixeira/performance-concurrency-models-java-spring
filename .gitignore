@@ -12,6 +12,4 @@ build/
 *.iml
 .vscode/
 
-# Resultados gerados (opcional - remova se quiser versionar)
 *.iml
-
