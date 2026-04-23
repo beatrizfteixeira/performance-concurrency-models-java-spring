@@ -6,8 +6,8 @@ DATE_TAG="rerun_$(date +%Y%m%d_%H%M%S)"
 
 mkdir -p "${RESULTS_DIR}/${DATE_TAG}"
 
-MVC_URL="http://18.236.90.11:8080"
-WEBFLUX_URL="http://18.236.90.11:8081"
+MVC_URL="http://52.12.185.217:8080"
+WEBFLUX_URL="http://52.12.185.217:8081"
 
 # Configurações com CV > 20% identificadas pela análise estatística (mvc-io-250 e mvc-io-400 nas métricas p99)
 PROBLEMATIC_CONFIGS=(
