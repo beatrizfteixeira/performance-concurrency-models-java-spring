@@ -15,5 +15,3 @@ build/
 # Resultados gerados (opcional - remova se quiser versionar)
 *.iml
 
-# Arquivos extraídos do tar.gz
-20260422_051015/
