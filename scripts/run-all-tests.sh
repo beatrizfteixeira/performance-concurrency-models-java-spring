@@ -6,7 +6,8 @@ DATE_TAG="$(date +%Y%m%d_%H%M%S)"
 
 mkdir -p "${RESULTS_DIR}/${DATE_TAG}"
 
-MVC_URL="http://178.238.235.114:8080"
+MVC_URL="http://18.236.90.11:8080"
+WEBFLUX_URL="http://18.236.90.11:8081"
 
 CPU_VUS=(10)
 TOTAL_ITERATIONS=500
@@ -66,7 +67,18 @@ smoke_test() {
     -e WARMUP_DURATION=2s \
     cpu-bound-fixed-test.js >/dev/null
 
-  echo "Smoke test passed."
+  echo "Smoke test on MVC passed."
+
+  echo "Running smoke test on ${WEBFLUX_URL}..."
+
+  k6 run \
+    -e APP_URL="${WEBFLUX_URL}" \
+    -e VU_TARGET=2 \
+    -e TOTAL_ITERATIONS=20 \
+    -e WARMUP_DURATION=2s \
+    cpu-bound-fixed-test.js >/dev/null
+
+  echo "Smoke test on WebFlux passed."
 }
 
 main() {
@@ -75,6 +87,11 @@ main() {
   for repeat in $(seq 1 ${REPEATS}); do
     for vus in "${CPU_VUS[@]}"; do
       run_test "mvc" "${MVC_URL}" "cpu" "${vus}" "${repeat}"
+      echo "Sleeping ${SLEEP_BETWEEN}s before next run..."
+      sleep "${SLEEP_BETWEEN}"
+
+      run_test "webflux" "${WEBFLUX_URL}" "cpu" "${vus}" "${repeat}"
+
       if [ "${repeat}" -lt "${REPEATS}" ] || [ "${vus}" != "${CPU_VUS[-1]}" ]; then
         echo "Sleeping ${SLEEP_BETWEEN}s before next run..."
         sleep "${SLEEP_BETWEEN}"
