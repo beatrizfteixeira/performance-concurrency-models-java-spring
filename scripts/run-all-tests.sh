@@ -6,16 +6,14 @@ DATE_TAG="$(date +%Y%m%d_%H%M%S)"
 
 mkdir -p "${RESULTS_DIR}/${DATE_TAG}"
 
-# Ajuste os IPs conforme sua infra
-MVC_URL="http://18.236.90.11:8080"
-WEBFLUX_URL="http://18.236.90.11:8081"
+MVC_URL="http://178.238.235.114:8080"
 
-# Níveis de carga
-CPU_VUS=(10 20 30 40 50 75 100)
-IO_VUS=(50 100 150 200 250 300 400 500 600 800)
+CPU_VUS=(10)
+TOTAL_ITERATIONS=500
+WARMUP_DURATION="5s"
 
-# Repetições
 REPEATS=3
+SLEEP_BETWEEN=60
 
 run_test() {
   local app_name="$1"
@@ -24,81 +22,71 @@ run_test() {
   local vus="$4"
   local repeat="$5"
 
-  local steady="3m"
-  if [ "$vus" -gt 250 ]; then
-    steady="5m"
-  fi
-
   local script_file=""
-  if [ "$workload" = "cpu" ]; then
-    script_file="cpu-bound-test.js"
+  if [ "${workload}" = "cpu" ]; then
+    script_file="cpu-bound-fixed-test.js"
   else
-    script_file="io-bound-test.js"
+    echo "ERRO: workload nao suportado nesta versao: ${workload}"
+    exit 1
   fi
 
-  local out_json="${RESULTS_DIR}/${DATE_TAG}/${app_name}-${workload}-${vus}-run${repeat}.json"
-  local out_txt="${RESULTS_DIR}/${DATE_TAG}/${app_name}-${workload}-${vus}-run${repeat}.log"
+  local prefix="${RESULTS_DIR}/${DATE_TAG}/${app_name}-${workload}-${vus}vus-${TOTAL_ITERATIONS}iter-run${repeat}"
+  local out_summary="${prefix}-summary.json"
+  local out_csv="${prefix}-raw.csv"
+  local out_log="${prefix}.log"
 
   echo "===================================================="
-  echo "Running: app=${app_name} workload=${workload} vus=${vus} repeat=${repeat}"
+  echo "Running: app=${app_name} workload=${workload} vus=${vus} iterations=${TOTAL_ITERATIONS} repeat=${repeat}"
   echo "URL: ${app_url}"
-  echo "Steady duration: ${steady}"
-  echo "Output JSON: ${out_json}"
+  echo "Warmup: ${WARMUP_DURATION} | Iterations: ${TOTAL_ITERATIONS}"
+  echo "Summary: ${out_summary}"
+  echo "Raw CSV: ${out_csv}"
   echo "===================================================="
 
   k6 run \
     -e APP_URL="${app_url}" \
     -e VU_TARGET="${vus}" \
-    -e STEADY_DURATION="${steady}" \
+    -e TOTAL_ITERATIONS="${TOTAL_ITERATIONS}" \
+    -e WARMUP_DURATION="${WARMUP_DURATION}" \
     "${script_file}" \
-    --summary-export "${out_json}" \
-    | tee "${out_txt}"
+    --summary-export "${out_summary}" \
+    --out csv="${out_csv}" \
+    | tee "${out_log}"
 
   echo "Finished: app=${app_name} workload=${workload} vus=${vus} repeat=${repeat}"
 }
 
 smoke_test() {
-  echo "Running smoke tests..."
+  echo "Running smoke test on ${MVC_URL}..."
 
-  k6 run -e APP_URL="${MVC_URL}" -e VU_TARGET=5 -e STEADY_DURATION=30s cpu-bound-test.js >/dev/null
-  k6 run -e APP_URL="${MVC_URL}" -e VU_TARGET=5 -e STEADY_DURATION=30s io-bound-test.js >/dev/null
-  k6 run -e APP_URL="${WEBFLUX_URL}" -e VU_TARGET=5 -e STEADY_DURATION=30s cpu-bound-test.js >/dev/null
-  k6 run -e APP_URL="${WEBFLUX_URL}" -e VU_TARGET=5 -e STEADY_DURATION=30s io-bound-test.js >/dev/null
+  k6 run \
+    -e APP_URL="${MVC_URL}" \
+    -e VU_TARGET=2 \
+    -e TOTAL_ITERATIONS=20 \
+    -e WARMUP_DURATION=2s \
+    cpu-bound-fixed-test.js >/dev/null
 
-  echo "Smoke tests passed."
-}
-
-warmup() {
-  local app_url="$1"
-  echo "Warming up ${app_url} ..."
-  k6 run -e APP_URL="${app_url}" -e VU_TARGET=20 -e STEADY_DURATION=2m cpu-bound-test.js >/dev/null
-  k6 run -e APP_URL="${app_url}" -e VU_TARGET=20 -e STEADY_DURATION=2m io-bound-test.js >/dev/null
+  echo "Smoke test passed."
 }
 
 main() {
   smoke_test
 
-  warmup "${MVC_URL}"
-  warmup "${WEBFLUX_URL}"
-
   for repeat in $(seq 1 ${REPEATS}); do
     for vus in "${CPU_VUS[@]}"; do
       run_test "mvc" "${MVC_URL}" "cpu" "${vus}" "${repeat}"
-      sleep 60
-      run_test "webflux" "${WEBFLUX_URL}" "cpu" "${vus}" "${repeat}"
-      sleep 60
-    done
-
-    for vus in "${IO_VUS[@]}"; do
-      run_test "mvc" "${MVC_URL}" "io" "${vus}" "${repeat}"
-      sleep 60
-      run_test "webflux" "${WEBFLUX_URL}" "io" "${vus}" "${repeat}"
-      sleep 60
+      if [ "${repeat}" -lt "${REPEATS}" ] || [ "${vus}" != "${CPU_VUS[-1]}" ]; then
+        echo "Sleeping ${SLEEP_BETWEEN}s before next run..."
+        sleep "${SLEEP_BETWEEN}"
+      fi
     done
   done
 
+  echo "===================================================="
   echo "All tests finished."
   echo "Results stored in: ${RESULTS_DIR}/${DATE_TAG}"
+  echo "===================================================="
+  ls -lh "${RESULTS_DIR}/${DATE_TAG}"
 }
 
 main
