@@ -5,17 +5,21 @@ import { Counter, Trend } from 'k6/metrics';
 const successCounter = new Counter('successful_requests');
 const failedCounter = new Counter('failed_requests');
 const responseTrend = new Trend('response_time_ms');
+const serverExecTimeTrend = new Trend('server_execution_time_ms');
 
-const vuTarget = parseInt(__ENV.VU_TARGET || '50', 10);
-const steadyDuration = __ENV.STEADY_DURATION || '3m';
+const totalIterations = parseInt(__ENV.TOTAL_ITERATIONS || '1000', 10);
+const vuTarget = parseInt(__ENV.VU_TARGET || '10', 10);
 const appUrl = __ENV.APP_URL || 'http://localhost:8080';
 
 export const options = {
-    stages: [
-        { duration: '30s', target: vuTarget },
-        { duration: steadyDuration, target: vuTarget },
-        { duration: '30s', target: 0 },
-    ],
+    scenarios: {
+        fixed_load: {
+            executor: 'shared-iterations',
+            vus: vuTarget,
+            iterations: totalIterations,
+            maxDuration: '30m',
+        },
+    },
     thresholds: {
         http_req_duration: ['p(95)<5000', 'p(99)<10000'],
         http_req_failed: ['rate<0.05'],
@@ -34,6 +38,7 @@ export default function () {
         },
     });
 
+    let serverExecTime = null;
     const ok = check(res, {
         'status is 200': (r) => r.status === 200,
         'content-type is json': (r) =>
@@ -48,7 +53,11 @@ export default function () {
         'executionTimeMs exists': (r) => {
             try {
                 const body = JSON.parse(r.body);
-                return typeof body.executionTimeMs === 'number';
+                if (typeof body.executionTimeMs === 'number') {
+                    serverExecTime = body.executionTimeMs;
+                    return true;
+                }
+                return false;
             } catch (_) {
                 return false;
             }
@@ -56,6 +65,9 @@ export default function () {
     });
 
     responseTrend.add(res.timings.duration);
+    if (serverExecTime !== null) {
+        serverExecTimeTrend.add(serverExecTime);
+    }
 
     if (ok) {
         successCounter.add(1);
