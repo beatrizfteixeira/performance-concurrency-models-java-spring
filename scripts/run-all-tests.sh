@@ -25,7 +25,7 @@ run_test() {
 
   local script_file=""
   if [ "${workload}" = "cpu" ]; then
-    script_file="cpu-bound-fixed-test.js"
+    script_file="cpu-bound-test.js"
   else
     echo "ERRO: workload nao suportado nesta versao: ${workload}"
     exit 1
