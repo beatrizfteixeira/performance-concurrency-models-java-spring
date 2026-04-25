@@ -12,4 +12,15 @@ build/
 *.iml
 .vscode/
 
-*.iml
+# Resultados gerados (opcional - remova se quiser versionar)
+*.png
+*.csv
+
+# Arquivos extraídos do tar.gz
+20260422_051015/
+
+# Re-execução com NDJSON raw (arquivos enormes, 1GB+)
+rerun_*/
+*-raw.json
+results-rerun-*.tar.gz
+*.tar.gz
