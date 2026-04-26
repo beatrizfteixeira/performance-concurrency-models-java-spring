@@ -65,7 +65,7 @@ smoke_test() {
     -e VU_TARGET=2 \
     -e TOTAL_ITERATIONS=20 \
     -e WARMUP_DURATION=2s \
-    cpu-bound-fixed-test.js >/dev/null
+    cpu-bound-test.js >/dev/null
 
   echo "Smoke test on MVC passed."
 
@@ -76,7 +76,7 @@ smoke_test() {
     -e VU_TARGET=2 \
     -e TOTAL_ITERATIONS=20 \
     -e WARMUP_DURATION=2s \
-    cpu-bound-fixed-test.js >/dev/null
+    cpu-bound-test.js >/dev/null
 
   echo "Smoke test on WebFlux passed."
 }
