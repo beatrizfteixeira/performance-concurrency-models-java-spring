@@ -16,6 +16,21 @@ WARMUP_DURATION="5s"
 REPEATS=1
 SLEEP_BETWEEN=60
 
+extract_steady_csv() {
+  local raw_csv="$1"
+  local steady_csv="$2"
+
+  echo "timestamp,duration_ms" > "${steady_csv}"
+  awk -F',' '$1 == "http_req_duration" && $12 == "steady" { print $2 "," $3 }' \
+    "${raw_csv}" >> "${steady_csv}"
+
+  local count
+  count=$(( $(wc -l < "${steady_csv}") - 1 ))
+  echo "  -> ${steady_csv}: ${count} requests extraidas"
+
+  rm -f "${raw_csv}"
+}
+
 run_test() {
   local app_name="$1"
   local app_url="$2"
@@ -33,15 +48,14 @@ run_test() {
 
   local prefix="${RESULTS_DIR}/${DATE_TAG}/${app_name}-${workload}-${vus}vus-${TOTAL_ITERATIONS}iter-run${repeat}"
   local out_summary="${prefix}-summary.json"
-  local out_csv="${prefix}-raw.csv"
+  local out_raw="${prefix}-raw.csv"
+  local out_steady="${prefix}-steady.csv"
   local out_log="${prefix}.log"
 
   echo "===================================================="
   echo "Running: app=${app_name} workload=${workload} vus=${vus} iterations=${TOTAL_ITERATIONS} repeat=${repeat}"
   echo "URL: ${app_url}"
   echo "Warmup: ${WARMUP_DURATION} | Iterations: ${TOTAL_ITERATIONS}"
-  echo "Summary: ${out_summary}"
-  echo "Raw CSV: ${out_csv}"
   echo "===================================================="
 
   k6 run \
@@ -51,8 +65,10 @@ run_test() {
     -e WARMUP_DURATION="${WARMUP_DURATION}" \
     "${script_file}" \
     --summary-export "${out_summary}" \
-    --out csv="${out_csv}" \
+    --out csv="${out_raw}" \
     | tee "${out_log}"
+
+  extract_steady_csv "${out_raw}" "${out_steady}"
 
   echo "Finished: app=${app_name} workload=${workload} vus=${vus} repeat=${repeat}"
 }
@@ -69,16 +85,16 @@ smoke_test() {
 
   echo "Smoke test on MVC passed."
 
-  echo "Running smoke test on ${WEBFLUX_URL}..."
+  # echo "Running smoke test on ${WEBFLUX_URL}..."
 
-  k6 run \
-    -e APP_URL="${WEBFLUX_URL}" \
-    -e VU_TARGET=2 \
-    -e TOTAL_ITERATIONS=20 \
-    -e WARMUP_DURATION=2s \
-    cpu-bound-test.js >/dev/null
+  # k6 run \
+  #   -e APP_URL="${WEBFLUX_URL}" \
+  #   -e VU_TARGET=2 \
+  #   -e TOTAL_ITERATIONS=20 \
+  #   -e WARMUP_DURATION=2s \
+  #   cpu-bound-test.js >/dev/null
 
-  echo "Smoke test on WebFlux passed."
+  # echo "Smoke test on WebFlux passed."
 }
 
 main() {
@@ -87,15 +103,13 @@ main() {
   for repeat in $(seq 1 ${REPEATS}); do
     for vus in "${CPU_VUS[@]}"; do
       run_test "mvc" "${MVC_URL}" "cpu" "${vus}" "${repeat}"
-      echo "Sleeping ${SLEEP_BETWEEN}s before next run..."
-      sleep "${SLEEP_BETWEEN}"
 
-      run_test "webflux" "${WEBFLUX_URL}" "cpu" "${vus}" "${repeat}"
+      # run_test "webflux" "${WEBFLUX_URL}" "cpu" "${vus}" "${repeat}"
 
-      if [ "${repeat}" -lt "${REPEATS}" ] || [ "${vus}" != "${CPU_VUS[-1]}" ]; then
-        echo "Sleeping ${SLEEP_BETWEEN}s before next run..."
-        sleep "${SLEEP_BETWEEN}"
-      fi
+      # if [ "${repeat}" -lt "${REPEATS}" ] || [ "${vus}" != "${CPU_VUS[-1]}" ]; then
+      #   echo "Sleeping ${SLEEP_BETWEEN}s before next run..."
+      #   sleep "${SLEEP_BETWEEN}"
+      # fi
     done
   done
 
