@@ -1,0 +1,19 @@
+package com.tcc.concurrency.mvc.io.repository;
+
+import com.tcc.concurrency.mvc.io.model.WorkloadData;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface WorkloadDataRepository extends JpaRepository<WorkloadData, Long> {
+
+    @Query(value = """
+    SELECT id, data, created_at
+    FROM workload_data
+    WHERE id = 1
+      AND pg_sleep(0.2) IS NOT NULL
+    """, nativeQuery = true)
+    WorkloadData executeIoBoundQuery();
+}
