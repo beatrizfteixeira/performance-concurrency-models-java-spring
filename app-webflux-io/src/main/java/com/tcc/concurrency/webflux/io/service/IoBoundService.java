@@ -1,4 +1,4 @@
-package com.tcc.concurrency.webflux.io.service;
+/* package com.tcc.concurrency.webflux.io.service;
 
 import com.tcc.concurrency.webflux.io.model.WorkloadData;
 import com.tcc.concurrency.webflux.io.repository.WorkloadDataRepository;
@@ -20,3 +20,4 @@ public class IoBoundService {
         return repository.executeIoBoundQuery();
     }
 }
+ */
