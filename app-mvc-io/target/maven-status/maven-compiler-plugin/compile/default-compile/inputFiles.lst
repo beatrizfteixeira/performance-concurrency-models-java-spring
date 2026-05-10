@@ -1,8 +1,0 @@
-/home/bia/Documentos/projeto-experimento-tcc/app-mvc-io/src/main/java/com/tcc/concurrency/mvc/io/MvcIoApplication.java
-/home/bia/Documentos/projeto-experimento-tcc/app-mvc-io/src/main/java/com/tcc/concurrency/mvc/io/controller/FileIoController.java
-/home/bia/Documentos/projeto-experimento-tcc/app-mvc-io/src/main/java/com/tcc/concurrency/mvc/io/controller/IoBoundController.java
-/home/bia/Documentos/projeto-experimento-tcc/app-mvc-io/src/main/java/com/tcc/concurrency/mvc/io/model/WorkloadData.java
-/home/bia/Documentos/projeto-experimento-tcc/app-mvc-io/src/main/java/com/tcc/concurrency/mvc/io/model/WorkloadResult.java
-/home/bia/Documentos/projeto-experimento-tcc/app-mvc-io/src/main/java/com/tcc/concurrency/mvc/io/repository/WorkloadDataRepository.java
-/home/bia/Documentos/projeto-experimento-tcc/app-mvc-io/src/main/java/com/tcc/concurrency/mvc/io/service/FileIoService.java
-/home/bia/Documentos/projeto-experimento-tcc/app-mvc-io/src/main/java/com/tcc/concurrency/mvc/io/service/IoBoundService.java
