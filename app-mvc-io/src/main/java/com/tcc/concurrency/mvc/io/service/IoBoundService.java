@@ -1,4 +1,4 @@
-package com.tcc.concurrency.mvc.io.service;
+/* package com.tcc.concurrency.mvc.io.service;
 
 import com.tcc.concurrency.mvc.io.model.WorkloadData;
 import com.tcc.concurrency.mvc.io.repository.WorkloadDataRepository;
@@ -18,3 +18,4 @@ public class IoBoundService {
         return repository.executeIoBoundQuery();
     }
 }
+ */

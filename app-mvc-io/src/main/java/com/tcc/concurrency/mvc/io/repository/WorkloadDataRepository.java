@@ -1,4 +1,4 @@
-package com.tcc.concurrency.mvc.io.repository;
+/* package com.tcc.concurrency.mvc.io.repository;
 
 import com.tcc.concurrency.mvc.io.model.WorkloadData;
 
@@ -17,3 +17,4 @@ public interface WorkloadDataRepository extends JpaRepository<WorkloadData, Long
     """, nativeQuery = true)
     WorkloadData executeIoBoundQuery();
 }
+ */
