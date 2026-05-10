@@ -1,4 +1,4 @@
-package com.tcc.concurrency.webflux.io.repository;
+/* package com.tcc.concurrency.webflux.io.repository;
 
 import com.tcc.concurrency.webflux.io.model.WorkloadData;
 
@@ -14,3 +14,4 @@ public interface WorkloadDataRepository extends ReactiveCrudRepository<WorkloadD
     @Query("SELECT id, data, created_at FROM workload_data WHERE id = 1 AND pg_sleep(0.2) IS NOT NULL")
     Mono<WorkloadData> executeIoBoundQuery();
 }
+ */
