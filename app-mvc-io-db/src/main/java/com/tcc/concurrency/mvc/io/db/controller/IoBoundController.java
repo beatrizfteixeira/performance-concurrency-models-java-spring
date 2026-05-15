@@ -1,0 +1,44 @@
+package com.tcc.concurrency.mvc.io.db.controller;
+
+import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
+
+import com.tcc.concurrency.mvc.io.db.model.WorkloadData;
+import com.tcc.concurrency.mvc.io.db.model.WorkloadResult;
+import com.tcc.concurrency.mvc.io.db.service.IoBoundService;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/io")
+public class IoBoundController {
+
+    private final IoBoundService ioBoundService;
+
+    public IoBoundController(final IoBoundService ioBoundService) {
+        this.ioBoundService = ioBoundService;
+    }
+
+    @GetMapping
+    public ResponseEntity<WorkloadResult> executeIoWorkload() {
+        final long startTime = System.nanoTime();
+        final String threadName = Thread.currentThread().getName();
+
+        final WorkloadData data = ioBoundService.executeIoBoundWorkload();
+
+        final long executionTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
+
+        final WorkloadResult result = new WorkloadResult(
+                "IO-DB",
+                executionTime,
+                LocalDateTime.now(),
+                threadName,
+                data != null ? data.getData() : "null"
+        );
+
+        return ResponseEntity.ok(result);
+    }
+}

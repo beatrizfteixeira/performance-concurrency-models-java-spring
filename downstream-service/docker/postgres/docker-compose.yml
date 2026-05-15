@@ -1,0 +1,39 @@
+# PostgreSQL para experimentos IO-bound com pg_sleep (app-mvc-io-db / app-webflux-io-db).
+#
+# Uso:
+#   cd downstream-service/docker/postgres
+#   docker compose up -d
+#
+# Credenciais alinhadas aos defaults das apps (testdb / testuser / testpass).
+# Ajuste max_connections e shared_buffers via .env (copie de env.example).
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres-benchmark-tcc
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-testdb}
+      POSTGRES_USER: ${POSTGRES_USER:-testuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-testpass}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+    command:
+      - postgres
+      - -c
+      - max_connections=${POSTGRES_MAX_CONNECTIONS:-2000}
+      - -c
+      - shared_buffers=${POSTGRES_SHARED_BUFFERS:-256MB}
+      - -c
+      - work_mem=${POSTGRES_WORK_MEM:-1MB}
+      - -c
+      - synchronous_commit=${POSTGRES_SYNCHRONOUS_COMMIT:-off}
+    volumes:
+      - postgres_benchmark_data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d:ro
+
+volumes:
+  postgres_benchmark_data:
